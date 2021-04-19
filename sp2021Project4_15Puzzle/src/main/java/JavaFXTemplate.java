@@ -25,6 +25,10 @@ public class JavaFXTemplate extends Application {
 			 													5, 0, 6, 7,
 			 													8, 9, 10, 11,
 			 													12, 13, 14, 15 ));
+	ArrayList<Integer> puzzle2 = new ArrayList<>(Arrays.asList( 4, 1, 2, 3,
+																5, 0, 6, 7,
+																8, 9, 10, 11,
+																12, 13, 14, 15 ));
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -80,7 +84,7 @@ public class JavaFXTemplate extends Application {
 		puzzleList = new ArrayList<GameButton>();
 		
 		for (int i = 0; i < 16; i++) {
-			puzzleList.add(new GameButton(i, puzzle1.get(i)));
+			puzzleList.add(new GameButton(puzzle1.get(i)));
 		}
 		
 		for (int i = 0; i < 16; i++) {
@@ -101,12 +105,29 @@ public class JavaFXTemplate extends Application {
 		return new Scene(gameScreen, 500, 500);
 	}
 	
-	private class GameButton extends Button {
-		public Integer pos, num;
+	public boolean checkWin() {
+		if (puzzleList.get(0).num != 0) {
+			return false;
+		}
 		
-		public GameButton(int p, int n) {
+		for (int i = 2; i<16; i++) {
+			if (puzzleList.get(i-1).num > puzzleList.get(i).num) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public Scene winScene() {
+		return new Scene(new BorderPane(), 500, 500);
+	}
+	
+	public class GameButton extends Button {
+		public Integer num;
+		
+		public GameButton(int n) {
 			super();
-			this.pos = p;
 			this.num = n;
 			
 			if (num != 0) {
@@ -117,37 +138,46 @@ public class JavaFXTemplate extends Application {
 		}
 		
 		private void makeMove() {
-			if ((this.pos)%4 != 0 && puzzleList.get(this.pos-1).num == 0) {
-				swapButton(this.pos, this.pos-1);
-			} else if ((this.pos+1)%4 != 0 && puzzleList.get(this.pos+1).num == 0 ) {
-				swapButton(this.pos, this.pos+1);
+			int bPos = puzzleList.indexOf(this);
+			
+			if ((bPos)%4 != 0 && puzzleList.get(bPos - 1).num == 0) {
+				swapButton(this, puzzleList.get(bPos - 1));
+			} else if ((bPos+1)%4 != 0 && puzzleList.get(bPos + 1).num == 0) {
+				swapButton(this, puzzleList.get(bPos + 1));
+			} else if (bPos - 4 >= 0 && puzzleList.get(bPos - 4).num == 0) {
+				swapButton(this, puzzleList.get(bPos - 4));
+			} else if (bPos + 4 <= 15 && puzzleList.get(bPos + 4).num == 0) {
+				swapButton(this, puzzleList.get(bPos + 4));
 			}
+			
 		}
 		
-		private void swapButton(Integer pos1, Integer pos2) {
-			System.out.println("Before:");
-			System.out.print("Num1 = " + puzzleList.get(pos1).num);
-			System.out.println("  Pos1 = " + pos1);
-			System.out.print("Num2 = " + puzzleList.get(pos2).num);
-			System.out.println("  Pos2 = " + pos2);
+		private void swapButton(GameButton b1, GameButton b2) {
+			if (b2 == null) {
+				return;
+			}
 			
-			Integer num1 = puzzleList.get(pos1).num;
-			Integer num2 = puzzleList.get(pos2).num;
+			int tempNum = b1.num;
+		
+			b1.num = b2.num;
+			if (b1.num == 0) {
+				b1.setText("");
+			} else {
+				b1.setText(b1.num.toString());
+			}
 			
-			puzzleList.get(pos1).num = num2;
-			System.out.println("Num: " + puzzleList.get(pos1).num);
-			puzzleList.get(pos1).pos = pos2;
-			puzzleList.get(pos1).setText(num2.toString());
+			b2.num = tempNum;
+			if (b2.num == 0) {
+				b2.setText("");
+			} else {
+				b2.setText(b2.num.toString());
+			}
 			
-			puzzleList.get(pos2).num = num1;
-			puzzleList.get(pos2).pos = pos1;
-			puzzleList.get(pos2).setText(num1.toString());
+			if (checkWin()) {
+				ourstage.setScene(winScene());
+				ourstage.show();
+			}
 			
-			System.out.println("After:");
-			System.out.print("Num1 = " + puzzleList.get(pos1).num);
-			System.out.println("  Pos1 = " + pos1);
-			System.out.print("Num2 = " + puzzleList.get(pos2).num);
-			System.out.println("  Pos2 = " + pos2 + "\n");
 		}
 	}
 	
