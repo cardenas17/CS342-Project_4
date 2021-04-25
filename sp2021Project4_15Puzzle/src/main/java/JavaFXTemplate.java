@@ -1,8 +1,12 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -16,13 +20,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 public class JavaFXTemplate extends Application {
 	Stage ourstage;
 	PauseTransition pause;
 	GridPane puzzleBoard;
-	Button showSolutionB;
+	Button showSolutionB, solveH1B, solveH2B;
 	int puzzleCounter = 1;
 	ArrayList<GameButton> puzzleList;
 	ArrayList<Integer> puzzle1 = new ArrayList<>(Arrays.asList(4, 1, 2, 3, 5, 9, 6, 7, 8, 0, 10, 11, 12, 13, 14, 15));
@@ -35,6 +40,8 @@ public class JavaFXTemplate extends Application {
 	ArrayList<Integer> puzzle8 = new ArrayList<>(Arrays.asList(1, 10, 4, 9, 6, 5, 13, 7, 2, 3, 15, 12, 0, 11, 8, 14));
 	ArrayList<Integer> puzzle9 = new ArrayList<>(Arrays.asList(8, 15, 0, 12, 9, 14, 3, 13, 2, 5, 4, 6, 7, 1, 10, 11));
 	ArrayList<Integer> puzzle10 = new ArrayList<>(Arrays.asList(14, 12, 11, 3, 8, 7, 1, 4, 9, 2, 5, 15, 6, 10, 13, 0));
+	ArrayList<Node> solution;
+	ExecutorService threads;
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -45,8 +52,18 @@ public class JavaFXTemplate extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		ourstage = primaryStage;
 		// TODO Auto-generated method stub
-		ourstage.setTitle("Welcome to JavaFX");
-
+		ourstage.setTitle("Welcome to 15 Puzzle!");
+		
+		threads = Executors.newFixedThreadPool(4);
+		ourstage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+            	threads.shutdown();
+                Platform.exit();
+                System.exit(0);
+            }
+        });
+		
 		ourstage.setScene(welcomeScene());
 		ourstage.show();
 		
@@ -56,10 +73,6 @@ public class JavaFXTemplate extends Application {
 			ourstage.show();
 		});
 		pause.play();
-		
-//		Thread t = new Thread(()-> {A_IDS_A_15solver ids = new A_IDS_A_15solver();});
-//		t.start();
-
 	}
 	
 	private Scene welcomeScene() {
@@ -114,6 +127,33 @@ public class JavaFXTemplate extends Application {
 		return null;
 	}
 	
+	public int[] ArrayListToArray(ArrayList<GameButton> p) {
+		int[] temp = new int[p.size()];
+		
+		for (int i = 0; i < p.size(); i++) {
+			temp[i] = p.get(i).num;
+		}
+		
+		return temp;
+	}
+	
+	private void displayState(Node n) {
+		int[] puzzleArray = n.getKey();
+		
+		for(int i =0; i< puzzleArray.length; i++){
+			// TODO update arraylist, maybe update colors
+//			puzzleList.get(i).setText();
+		}
+	}
+	
+	public void displaySolution() {
+		for(int i=0; i<solution.size(); i++){
+			
+			displayState(solution.get(i));
+			
+		}
+	}
+	
 	private Scene gameScene() {
 		puzzleBoard = new GridPane();
 		puzzleBoard.setAlignment(Pos.TOP_RIGHT);
@@ -149,16 +189,18 @@ public class JavaFXTemplate extends Application {
 		newPuzzleB.setOnAction(newPuzzle);
 		newPuzzleB.setPadding(new Insets(15,15,15,15));
 		
-		Button solveH1B = new Button("Solve with H1");
+		solveH1B = new Button("Solve with H1");
 		solveH1B.setOnAction(H1);
 		solveH1B.setPadding(new Insets(15,15,15,15));
 		
-		Button solveH2B = new Button("Solve with H2");
+		solveH2B = new Button("Solve with H2");
 		solveH2B.setOnAction(H2);
 		solveH2B.setPadding(new Insets(15,15,15,15));
 		
 		showSolutionB = new Button("Show Solution");
 		showSolutionB.setPadding(new Insets(15,15,15,15));
+		showSolutionB.setOnAction(solve);
+		showSolutionB.setDisable(true);
 		
 		Button exit = new Button("Exit Game");
 		exit.setOnAction(quit);
@@ -172,26 +214,64 @@ public class JavaFXTemplate extends Application {
 	
 	EventHandler<ActionEvent> newPuzzle = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
+			solution.clear();
 			ourstage.setScene(gameScene());
+		}
+	};
+	
+	EventHandler<ActionEvent> H1 = new EventHandler<ActionEvent>() {
+		public void handle(ActionEvent e) {
+			SolutionTask task = new SolutionTask(data->{
+				Platform.runLater(()->{
+				solution = data;
+				showSolutionB.setDisable(false);
+				});
+			}, "heuristicOne", ArrayListToArray(puzzleList));
+			threads.submit(task);
+			
+			solveH1B.setDisable(true);
+			solveH2B.setDisable(true);
+			
+			solveH1B.setText("Solving with H1");
+			solveH2B.setText("̵S̵o̵l̵v̵e̵ ̵w̵i̵t̵h̵ ̵H̵2");
+		}
+	};
+	
+	EventHandler<ActionEvent> H2 = new EventHandler<ActionEvent>() {
+		public void handle(ActionEvent e) {
+			SolutionTask task = new SolutionTask(data->{
+				Platform.runLater(()->{
+				solution = data;
+				showSolutionB.setDisable(false);
+				});
+			}, "heuristicTwo", ArrayListToArray(puzzleList));
+			threads.submit(task);
+			
+			solveH1B.setDisable(true);
+			solveH2B.setDisable(true);
+			
+			solveH1B.setText("̵S̵o̵l̵v̵e̵ ̵w̵i̵t̵h̵ ̵H̵1");
+			solveH2B.setText("Solving with H2");
+		}
+	};
+	
+	EventHandler<ActionEvent> solve = new EventHandler<ActionEvent>() {
+		public void handle(ActionEvent e) {
+			solveH1B.setDisable(false);
+			solveH2B.setDisable(false);
+			
+			showSolutionB.setDisable(true);
+			
+			solveH1B.setText("Solve with H1");
+			solveH2B.setText("Solve with H2");
+			
+			solution.clear();
 		}
 	};
 	
 	EventHandler<ActionEvent> quit = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
 			ourstage.close();
-		}
-	};
-	
-	EventHandler<ActionEvent> H1 = new EventHandler<ActionEvent>() {
-		public void handle(ActionEvent e) {
-			System.out.println("FROM H1");
-		}
-	};
-	
-	EventHandler<ActionEvent> H2 = new EventHandler<ActionEvent>() {
-		public void handle(ActionEvent e) {
-			// add code
-			System.out.println("FROM H2");
 		}
 	};
 	

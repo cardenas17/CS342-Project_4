@@ -35,7 +35,7 @@ public A_IDS_A_15solver(){
  * @param startState
  * @param heuristic
  */
-	public void A_Star(Node startState, String heuristic){
+	public static ArrayList<Node> A_Star(Node startState, String heuristic){
 		
 				
 		DB_Solver2 start_A_Star = new DB_Solver2(startState, heuristic);	//DB_Solver class initialized with startState node
@@ -52,12 +52,14 @@ public A_IDS_A_15solver(){
 		if(solution == null)								//no solution was found
 		{
 			System.out.println("\nThere did not exist a solution to your puzzle with A* search\n");
+			return null;
 		}
 		else											//found a solution so, get the path and print it
 		{
 			ArrayList<Node> solutionPath = start_A_Star.getSolutionPath(solution);	//creates ArrayList of solution path
 			
 			printSolution(solutionPath);
+			return solutionPath;
 			
 			//System.out.println("\n$$$$$$$$$$$$$$ the solution path is "+ solutionPath.size()+ " moves long\n");
 		}
@@ -67,7 +69,7 @@ public A_IDS_A_15solver(){
 	
 	
 
-	public void printSolution(ArrayList<Node> path){
+	public static void printSolution(ArrayList<Node> path){
 	
 		System.out.print("\n\n");
 		
@@ -83,7 +85,7 @@ public A_IDS_A_15solver(){
 		System.out.println("\n**************Goal state****************");
 	}
 
-	public void printState(Node node){
+	public static void printState(Node node){
 	
 		int[] puzzleArray = node.getKey();
 		
