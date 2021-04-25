@@ -40,7 +40,7 @@ public class JavaFXTemplate extends Application {
 	ArrayList<Integer> puzzle8 = new ArrayList<>(Arrays.asList(1, 10, 4, 9, 6, 5, 13, 7, 2, 3, 15, 12, 0, 11, 8, 14));
 	ArrayList<Integer> puzzle9 = new ArrayList<>(Arrays.asList(8, 15, 0, 12, 9, 14, 3, 13, 2, 5, 4, 6, 7, 1, 10, 11));
 	ArrayList<Integer> puzzle10 = new ArrayList<>(Arrays.asList(14, 12, 11, 3, 8, 7, 1, 4, 9, 2, 5, 15, 6, 10, 13, 0));
-	ArrayList<Node> solution;
+	ArrayList<Node> solution = new ArrayList<Node>();
 	ExecutorService threads;
 	
 	public static void main(String[] args) {
@@ -148,9 +148,7 @@ public class JavaFXTemplate extends Application {
 	
 	public void displaySolution() {
 		for(int i=0; i<solution.size(); i++){
-			
 			displayState(solution.get(i));
-			
 		}
 	}
 	
@@ -165,7 +163,7 @@ public class JavaFXTemplate extends Application {
 		ArrayList<Integer> currPuzzle = pickPuzzle();
 		
 		for (int i = 0; i < 16; i++) {
-			puzzleList.add(new GameButton(currPuzzle.get(i)));
+			puzzleList.add(new GameButton(currPuzzle.get(i), i));
 		}
 		
 		for (int i = 0; i < 16; i++) {
@@ -181,33 +179,59 @@ public class JavaFXTemplate extends Application {
 		}
 		
 		BorderPane gameScreen = new BorderPane();
-		HBox root = new HBox(puzzleBoard);
-		root.setPadding(new Insets(15,15,15,15));
-		gameScreen.setCenter(root);
+		HBox gameScreenH = new HBox(puzzleBoard);
+		gameScreenH.setAlignment(Pos.CENTER);
+		VBox gameScreenV = new VBox(gameScreenH);
+		gameScreenV.setAlignment(Pos.CENTER);
 		
 		Button newPuzzleB = new Button("New Puzzle");
 		newPuzzleB.setOnAction(newPuzzle);
-		newPuzzleB.setPadding(new Insets(15,15,15,15));
+		newPuzzleB.setPadding(new Insets(10,10,10,10));
+		newPuzzleB.setMinWidth(110);
+		HBox newPuzzleH = new HBox(newPuzzleB);
+		newPuzzleH.setPadding(new Insets(15,15,15,15));
+		newPuzzleH.setAlignment(Pos.CENTER);
 		
 		solveH1B = new Button("Solve with H1");
 		solveH1B.setOnAction(H1);
-		solveH1B.setPadding(new Insets(15,15,15,15));
+		solveH1B.setPadding(new Insets(10,10,10,10));
+		solveH1B.setMinWidth(110);
+		HBox solveH1H = new HBox(solveH1B);
+		solveH1H.setPadding(new Insets(15,15,15,15));
+		solveH1H.setAlignment(Pos.CENTER);
 		
 		solveH2B = new Button("Solve with H2");
 		solveH2B.setOnAction(H2);
-		solveH2B.setPadding(new Insets(15,15,15,15));
+		solveH2B.setPadding(new Insets(10,10,10,10));
+		solveH2B.setMinWidth(110);
+		HBox solveH2H = new HBox(solveH2B);
+		solveH2H.setPadding(new Insets(15,15,15,15));
+		solveH2H.setAlignment(Pos.CENTER);
 		
 		showSolutionB = new Button("Show Solution");
-		showSolutionB.setPadding(new Insets(15,15,15,15));
 		showSolutionB.setOnAction(solve);
 		showSolutionB.setDisable(true);
+		showSolutionB.setPadding(new Insets(10,10,10,10));
+		showSolutionB.setMinWidth(110);
+		HBox showSolutionH = new HBox(showSolutionB);
+		showSolutionH.setPadding(new Insets(15,15,15,15));
+		showSolutionH.setAlignment(Pos.CENTER);
 		
 		Button exit = new Button("Exit Game");
 		exit.setOnAction(quit);
-		exit.setPadding(new Insets(15,15,15,15));
+		exit.setPadding(new Insets(10,10,10,10));
+		exit.setMinWidth(110);
+		HBox exitH = new HBox(exit);
+		exitH.setPadding(new Insets(15,15,15,15));
+		exitH.setAlignment(Pos.CENTER);
 		
-		VBox node = new VBox(newPuzzleB, solveH1B, solveH2B, showSolutionB, exit);
-		gameScreen.setLeft(node);
+		VBox node = new VBox(newPuzzleH, solveH1H, solveH2H, showSolutionH, exitH);
+//		node.setPadding(new Insets(17,0,17,0));
+		node.setAlignment(Pos.CENTER);
+		
+		HBox everything = new HBox(node, gameScreenV);
+		everything.setAlignment(Pos.CENTER);
+		gameScreen.setCenter(everything);
 		
 		return new Scene(gameScreen, 500, 400);
 	}
@@ -300,17 +324,27 @@ public class JavaFXTemplate extends Application {
 	public Scene winScene() {
 		return new Scene(new BorderPane(), 500, 500);
 	}
+	
 	//--------------------------------------------------------------------------
 	public class GameButton extends Button {
 		public Integer num;
 		
-		public GameButton(int n) {
+		public GameButton(Integer n, int pos) {
 			super();
+
 			this.num = n;
-			
-			if (num != 0) {
-				this.setText(this.num.toString());
+			if (n == 0) {
+				this.setText("");
+				this.setStyle("-fx-background-color: #fbfb6a;");
+			} else {
+				this.setText(n.toString());
+				if (pos == n) {
+					this.setStyle("-fx-background-color: #9cfc9c;");
+				} else {
+					this.setStyle("-fx-background-color: #9cccfc;");
+				}
 			}
+			
 			this.setPrefSize(75, 75);
 			this.setOnAction(e-> makeMove());
 		}
@@ -336,26 +370,30 @@ public class JavaFXTemplate extends Application {
 			}
 			
 			int tempNum = b1.num;
-		
-			b1.num = b2.num;
-			if (b1.num == 0) {
-				b1.setText("");
-			} else {
-				b1.setText(b1.num.toString());
-			}
 			
-			b2.num = tempNum;
-			if (b2.num == 0) {
-				b2.setText("");
-			} else {
-				b2.setText(b2.num.toString());
-			}
+			b1.updateNum(b2.num);
+			b2.updateNum(tempNum);
+			
 			// printArray();
 			if (checkWin()) {
 				ourstage.setScene(winScene());
 				ourstage.show();
 			}
-			
+		}
+		
+		public void updateNum(Integer n) {
+			this.num = n;
+			if (n == 0) {
+				this.setText("");
+				this.setStyle("-fx-background-color: #fbfb6a;");
+			} else {
+				this.setText(n.toString());
+				if (puzzleList.indexOf(this) == n) {
+					this.setStyle("-fx-background-color: #9cfc9c;");
+				} else {
+					this.setStyle("-fx-background-color: #9cccfc;");
+				}
+			}
 		}
 	}  // end of button class
 	//--------------------------------------------------------------------------
