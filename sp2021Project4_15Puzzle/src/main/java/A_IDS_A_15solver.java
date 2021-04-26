@@ -47,7 +47,7 @@ public A_IDS_A_15solver(){
 		
 		Long end = System.currentTimeMillis();
 
-		System.out.println("\n******Run Time for A* "+ heuristic + " is: "+ (end-start) + " milliseconds**********");
+//		System.out.println("\n******Run Time for A* "+ heuristic + " is: "+ (end-start) + " milliseconds**********");
 		
 		if(solution == null)								//no solution was found
 		{
@@ -58,8 +58,9 @@ public A_IDS_A_15solver(){
 		{
 			ArrayList<Node> solutionPath = start_A_Star.getSolutionPath(solution);	//creates ArrayList of solution path
 			
-			printSolution(solutionPath);
+//			printSolution(solutionPath);
 			return solutionPath;
+			
 			
 			//System.out.println("\n$$$$$$$$$$$$$$ the solution path is "+ solutionPath.size()+ " moves long\n");
 		}
