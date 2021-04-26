@@ -4,13 +4,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -59,7 +55,7 @@ public class JavaFXTemplate extends Application {
 		// TODO Auto-generated method stub
 		ourstage.setTitle("Welcome to 15 Puzzle!");
 		
-		threads = Executors.newFixedThreadPool(4);
+		threads = Executors.newFixedThreadPool(11);
 		ourstage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
@@ -147,7 +143,6 @@ public class JavaFXTemplate extends Application {
 	
 	private void displayState(Node n) {
 		int[] puzzleArray = n.getKey();
-		System.out.print("depth " + n.getDepth());
 		
 		for(int i = 0; i< puzzleArray.length; i++){
 			puzzleList.get(i).updateNum(puzzleArray[i]);
@@ -155,9 +150,19 @@ public class JavaFXTemplate extends Application {
 	}
 	
 	public void displaySolution() {
-		A_IDS_A_15solver.printSolution(solution);
-//		displayState(solution.get(0));
+		PauseTransition pause2 = new PauseTransition(Duration.seconds(1));
+		pause2.play();
+		AtomicInteger count = new AtomicInteger(1);
 		
+		pause2.setOnFinished(e-> {
+			if (checkWin()) {
+				;
+			} else if (count.get() <= 10) {
+				displayState(solution.get(count.get()));
+				count.set(count.get() + 1);;
+				pause2.play();
+			}
+		});
 		
 	}
 	
@@ -246,7 +251,6 @@ public class JavaFXTemplate extends Application {
 	
 	EventHandler<ActionEvent> newPuzzle = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
-			solution.clear();
 			ourstage.setScene(gameScene());
 		}
 	};
@@ -299,7 +303,6 @@ public class JavaFXTemplate extends Application {
 			
 			displaySolution();
 			
-			solution.clear();
 		}
 	};
 	
