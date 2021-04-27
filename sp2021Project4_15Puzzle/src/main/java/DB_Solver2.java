@@ -81,14 +81,14 @@ public class DB_Solver2 {
 				//check right, if it contains the goal state return solution node
 				if(moveRight(current.getKey())){
 					
-					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
+//					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
 					return solutionNode;
 				}
 				
 				//check left
 				if(moveLeft(current.getKey())){
 					
-					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
+//					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
 					return solutionNode;
 				}
 				
@@ -96,14 +96,14 @@ public class DB_Solver2 {
 				//check up
 				if(moveUp(current.getKey())){
 					
-					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
+//					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
 					return solutionNode;
 				}
 				
 				//check down
 				if(moveDown(current.getKey())){
 					
-					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
+//					System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
 					return solutionNode;
 				}	
 				
@@ -111,7 +111,7 @@ public class DB_Solver2 {
 				//System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
 			}
 			
-			System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
+//			System.out.println("the size of the queue and hash: "+ queue.size()+ " "+ hash.size());
 			return null;							//queue is empty, no solution
 									
 				

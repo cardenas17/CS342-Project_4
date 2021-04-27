@@ -1,10 +1,9 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.sun.prism.paint.Color;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -41,7 +40,7 @@ public class JavaFXTemplate extends Application {
 	PauseTransition pause;
 	GridPane puzzleBoard;
 	Button newPuzzleB, showSolutionB, solveH1B, solveH2B;
-	int puzzleCounter = 1;
+	int puzzleCounter;
 	ArrayList<GameButton> puzzleList;
 	ArrayList<Integer> puzzle1 = new ArrayList<>(Arrays.asList(4, 1, 2, 3, 5, 9, 6, 7, 8, 0, 10, 11, 12, 13, 14, 15));
 	ArrayList<Integer> puzzle2 = new ArrayList<>(Arrays.asList(4, 0, 1, 2, 5, 9, 7, 3, 12, 8, 6, 10, 13, 14, 15, 11));
@@ -54,7 +53,7 @@ public class JavaFXTemplate extends Application {
 	ArrayList<Integer> puzzle9 = new ArrayList<>(Arrays.asList(15, 8, 1, 6, 11, 9, 2, 5, 3, 12, 10, 7, 14, 4, 13, 0));
 	ArrayList<Integer> puzzle10 = new ArrayList<>(Arrays.asList(9, 14, 12, 15, 11, 5, 6, 2, 8, 0, 10, 1, 4, 13, 3, 7));
 	ArrayList<Integer> puzzle11 = new ArrayList<>(Arrays.asList(9, 2, 14, 15, 3, 12, 0, 8, 7, 13, 4, 5, 6, 10, 1, 11));
-	ArrayList<Node> solution = new ArrayList<Node>();
+	ArrayList<Node> solution;
 	ExecutorService threads;
 	
 	public static void main(String[] args) {
@@ -69,6 +68,12 @@ public class JavaFXTemplate extends Application {
 		ourstage.setTitle("Welcome to 15 Puzzle!");
 		
 		threads = Executors.newFixedThreadPool(11);
+		
+		Random rand = new Random();
+		puzzleCounter = rand.nextInt(11) + 1;
+		
+		solution = new ArrayList<Node>();
+		
 		ourstage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
@@ -167,40 +172,9 @@ public class JavaFXTemplate extends Application {
 		return temp;
 	}
 	
-	private void displayState(Node n) {
-		int[] puzzleArray = n.getKey();
-		
-		for(int i = 0; i< puzzleArray.length; i++){
-			puzzleList.get(i).updateNum(puzzleArray[i]);
-		}
-	}
-	
-	public void displaySolution() {
-		PauseTransition pause2 = new PauseTransition(Duration.seconds(1));
-		pause2.play();
-		AtomicInteger count = new AtomicInteger(1);
-		
-		pause2.setOnFinished(e-> {
-			if (checkWin()) {
-				;
-			} else if (count.get() <= 10) {
-				displayState(solution.get(count.get()));
-				count.set(count.get() + 1);;
-				pause2.play();
-			} else {
-				solveH1B.setDisable(false);
-				solveH2B.setDisable(false);
-				
-				solveH1B.setText("Solve with H1");
-				solveH2B.setText("Solve with H2");
-				
-				newPuzzleB.setDisable(false);
-			}
-		});
-		
-	}
-	
 	private Scene gameScene() {
+		ourstage.setTitle("15 Puzzle: By Angel and Kartik");
+		
 		puzzleBoard = new GridPane();
 		puzzleBoard.setAlignment(Pos.TOP_RIGHT);
 		puzzleBoard.setPadding(new Insets(10.0));
@@ -336,6 +310,7 @@ public class JavaFXTemplate extends Application {
 	EventHandler<ActionEvent> H1 = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
 			newPuzzleB.setDisable(true);
+			setDisableGridPane(true);
 			
 			SolutionTask task = new SolutionTask(data->{
 				Platform.runLater(()->{
@@ -357,6 +332,9 @@ public class JavaFXTemplate extends Application {
 	
 	EventHandler<ActionEvent> H2 = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
+			newPuzzleB.setDisable(true);
+			setDisableGridPane(true);
+			
 			SolutionTask task = new SolutionTask(data->{
 				Platform.runLater(()->{
 				solveH2B.setText("Solved with H2");
@@ -373,6 +351,40 @@ public class JavaFXTemplate extends Application {
 			solveH2B.setText("Solving with H2");
 		}
 	};
+	
+	private void displayState(Node n) {
+		int[] puzzleArray = n.getKey();
+		
+		for(int i = 0; i< puzzleArray.length; i++){
+			puzzleList.get(i).updateNum(puzzleArray[i]);
+		}
+	}
+	
+	public void displaySolution() {
+		PauseTransition pause2 = new PauseTransition(Duration.seconds(1));
+		pause2.play();
+		AtomicInteger count = new AtomicInteger(1);
+		
+		pause2.setOnFinished(e-> {
+			if (checkWin()) {
+				;
+			} else if (count.get() <= 10) {
+				displayState(solution.get(count.get()));
+				count.set(count.get() + 1);;
+				pause2.play();
+			} else {
+				solveH1B.setDisable(false);
+				solveH2B.setDisable(false);
+				
+				solveH1B.setText("Solve with H1");
+				solveH2B.setText("Solve with H2");
+				
+				newPuzzleB.setDisable(false);
+				setDisableGridPane(false);
+			}
+		});
+		
+	}
 	
 	EventHandler<ActionEvent> solve = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
@@ -407,17 +419,46 @@ public class JavaFXTemplate extends Application {
 		return true;
 	}
 	
-//	public void printArray() {
-//		for (int i = 0; i < puzzleList.size(); i++) {
-//			System.out.print(puzzleList.get(i).num + " ");
-//		}
-//		System.out.print("\n");
-//	}
+	public void setDisableGridPane(boolean choice) {
+		puzzleBoard.setMouseTransparent(choice);
+	}
 	
 	public Scene winScene() {
-		Text message = new Text("Welcome to 15-Puzzle!");
+		ourstage.setTitle("15 Puzzle: Game Over");
+		
+		Text message = new Text("Congratulations!");
 		message.setFont(Font.font("Verdana", FontWeight.BOLD, 35));
-		return new Scene(new BorderPane(), 500, 500);
+		HBox messageH = new HBox(message);
+		messageH.setAlignment(Pos.CENTER);
+		
+		Button replay = new Button("Play Again!");
+		replay.setOnAction(newPuzzle);
+		VBox replayV = new VBox(replay);
+		replayV.setPadding(new Insets(15,15,15,15));
+		
+		Button quitB = new Button("Quit Game.");
+		quitB.setOnAction(quit);
+		VBox quitV = new VBox(quitB);
+		quitV.setPadding(new Insets(15,15,15,15));
+		
+		HBox options = new HBox(replayV, quitV);
+		options.setAlignment(Pos.CENTER);
+		
+		VBox align = new VBox(messageH, options);
+		align.setAlignment(Pos.CENTER);
+		
+		BorderPane endScreen = new BorderPane(align);
+		
+		Image image1 = new Image("honeycomb.gif", 550, 500, true, true);
+		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		
+		endScreen.setBackground(new Background(new BackgroundImage(image1,
+	            BackgroundRepeat.NO_REPEAT,
+	            BackgroundRepeat.NO_REPEAT,
+	            BackgroundPosition.CENTER,
+	            bSize)));
+		
+		return new Scene(endScreen, 500, 500);
 	}
 	
 	//--------------------------------------------------------------------------
