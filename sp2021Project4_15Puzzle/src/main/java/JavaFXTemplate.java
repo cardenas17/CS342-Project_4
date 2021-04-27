@@ -4,6 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.sun.prism.paint.Color;
+
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -13,11 +15,22 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -27,7 +40,7 @@ public class JavaFXTemplate extends Application {
 	Stage ourstage;
 	PauseTransition pause;
 	GridPane puzzleBoard;
-	Button showSolutionB, solveH1B, solveH2B;
+	Button newPuzzleB, showSolutionB, solveH1B, solveH2B;
 	int puzzleCounter = 1;
 	ArrayList<GameButton> puzzleList;
 	ArrayList<Integer> puzzle1 = new ArrayList<>(Arrays.asList(4, 1, 2, 3, 5, 9, 6, 7, 8, 0, 10, 11, 12, 13, 14, 15));
@@ -68,7 +81,7 @@ public class JavaFXTemplate extends Application {
 		ourstage.setScene(welcomeScene());
 		ourstage.show();
 		
-		pause = new PauseTransition(Duration.seconds(1));
+		pause = new PauseTransition(Duration.seconds(3));
 		pause.setOnFinished(e-> {
 			ourstage.setScene(gameScene());
 			ourstage.show();
@@ -78,16 +91,29 @@ public class JavaFXTemplate extends Application {
 	
 	private Scene welcomeScene() {
 		Text message = new Text("Welcome to 15-Puzzle!");
-		message.setFont(Font.font(35));
+		message.setFont(Font.font("Verdana", FontWeight.BOLD, 35));
+	
 		
 		
-		VBox align = new VBox(message);
+		Text names = new Text("By: Angel Cardenas and Kartik Maheshwari");
+		names.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+		
+		VBox align = new VBox(message, names);
 		align.setAlignment(Pos.CENTER);
 		HBox align2 = new HBox(align);
 		align2.setAlignment(Pos.CENTER);
 		
+		BorderPane welcome = new BorderPane(align2);
+		Image image1 = new Image("welcome2.gif", 550, 500, false, true);
+		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
 		
-		return new Scene(new BorderPane(align2), 500, 400);
+		welcome.setBackground(new Background(new BackgroundImage(image1,
+	            BackgroundRepeat.NO_REPEAT,
+	            BackgroundRepeat.NO_REPEAT,
+	            BackgroundPosition.CENTER,
+	            bSize)));
+		
+		return new Scene(welcome, 550, 500);
 	}
 	
 	public ArrayList<Integer> pickPuzzle() {
@@ -161,6 +187,8 @@ public class JavaFXTemplate extends Application {
 				displayState(solution.get(count.get()));
 				count.set(count.get() + 1);;
 				pause2.play();
+			} else {
+				newPuzzleB.setDisable(false);
 			}
 		});
 		
@@ -198,7 +226,7 @@ public class JavaFXTemplate extends Application {
 		VBox gameScreenV = new VBox(gameScreenH);
 		gameScreenV.setAlignment(Pos.CENTER);
 		
-		Button newPuzzleB = new Button("New Puzzle");
+		newPuzzleB = new Button("New Puzzle");
 		newPuzzleB.setOnAction(newPuzzle);
 		newPuzzleB.setPadding(new Insets(10,10,10,10));
 		newPuzzleB.setMinWidth(110);
@@ -239,15 +267,59 @@ public class JavaFXTemplate extends Application {
 		exitH.setPadding(new Insets(15,15,15,15));
 		exitH.setAlignment(Pos.CENTER);
 		
-		VBox node = new VBox(newPuzzleH, solveH1H, solveH2H, showSolutionH, exitH);
+		Button HTPB = new Button("How to Play?");
+		HTPB.setOnAction(displayInst);
+		HTPB.setPadding(new Insets(10,10,10,10));
+		HTPB.setMinWidth(110);
+		HBox HTPH = new HBox(HTPB);
+		HTPH.setPadding(new Insets(15,15,15,15));
+		HTPH.setAlignment(Pos.CENTER);
+		
+		VBox node = new VBox(newPuzzleH, solveH1H, solveH2H, showSolutionH, exitH, HTPH);
 		node.setAlignment(Pos.CENTER);
 		
 		HBox everything = new HBox(node, gameScreenV);
 		everything.setAlignment(Pos.CENTER);
 		gameScreen.setCenter(everything);
 		
-		return new Scene(gameScreen, 500, 400);
+		Image image1 = new Image("main.gif", 550, 500, false, true);
+		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		
+		gameScreen.setBackground(new Background(new BackgroundImage(image1,
+	            BackgroundRepeat.NO_REPEAT,
+	            BackgroundRepeat.NO_REPEAT,
+	            BackgroundPosition.CENTER,
+	            bSize)));
+		
+		return new Scene(gameScreen, 550, 500);
 	}
+	
+	EventHandler<ActionEvent> displayInst = new EventHandler<ActionEvent>() {
+		public void handle(ActionEvent e) {
+			// creates a new Dialog box for displaying instructions
+			Dialog<String> directions = new Dialog<String>();
+			directions.setTitle("How to play 15 Puzzle");
+			directions.setResizable(true);
+			directions.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+			directions.getDialogPane().setMinWidth(500.0);
+			
+			// instructions for playing the game
+			directions.setContentText("Numbered tiles can be swapped with the blank spot one at a time. \r\n"
+					+ "A solved puzzle should have all of the tiles in order from lowest number to highest number with the blank spot in the upper left.\r\n\n"
+					+ "You can click either of the Solve Buttons to solve 10 moves in the background.\r\n"
+					+ "After it is solved, you can see those 10 moves by clicking the Show Solution Button.\r\n\n"
+					+ "H1 uses the number of tiles that are out of place to solve the board.\r\n"
+					+ "H2 uses the manhattan distance to solve the board.\r\n\n"
+					+ "If you have trouble you can get a new puzzle by clicking New Puzzle or exit by clicking Exit.\r\n");
+			
+			// Button to close the dialog box
+			ButtonType ok = new ButtonType("OK", ButtonData.OK_DONE);
+			directions.getDialogPane().getButtonTypes().add(ok);
+			
+			// display dialog box
+			directions.showAndWait();
+		}
+	};
 	
 	EventHandler<ActionEvent> newPuzzle = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
@@ -295,6 +367,8 @@ public class JavaFXTemplate extends Application {
 		public void handle(ActionEvent e) {
 			solveH1B.setDisable(false);
 			solveH2B.setDisable(false);
+			newPuzzleB.setDisable(true);
+			
 			
 			showSolutionB.setDisable(true);
 			
@@ -339,6 +413,8 @@ public class JavaFXTemplate extends Application {
 //	}
 	
 	public Scene winScene() {
+		Text message = new Text("Welcome to 15-Puzzle!");
+		message.setFont(Font.font("Verdana", FontWeight.BOLD, 35));
 		return new Scene(new BorderPane(), 500, 500);
 	}
 	
@@ -362,7 +438,7 @@ public class JavaFXTemplate extends Application {
 				}
 			}
 			
-			this.setPrefSize(75, 75);
+			this.setPrefSize(95, 95);
 			this.setOnAction(e-> makeMove());
 		}
 		
