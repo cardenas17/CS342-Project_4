@@ -188,6 +188,12 @@ public class JavaFXTemplate extends Application {
 				count.set(count.get() + 1);;
 				pause2.play();
 			} else {
+				solveH1B.setDisable(false);
+				solveH2B.setDisable(false);
+				
+				solveH1B.setText("Solve with H1");
+				solveH2B.setText("Solve with H2");
+				
 				newPuzzleB.setDisable(false);
 			}
 		});
@@ -329,10 +335,14 @@ public class JavaFXTemplate extends Application {
 	
 	EventHandler<ActionEvent> H1 = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
+			newPuzzleB.setDisable(true);
+			
 			SolutionTask task = new SolutionTask(data->{
 				Platform.runLater(()->{
+				solveH1B.setText("Solved with H1");
 				solution = data;
 				showSolutionB.setDisable(false);
+				newPuzzleB.setDisable(false);
 				});
 			}, "heuristicOne", ArrayListToArray(puzzleList));
 			threads.submit(task);
@@ -349,6 +359,7 @@ public class JavaFXTemplate extends Application {
 		public void handle(ActionEvent e) {
 			SolutionTask task = new SolutionTask(data->{
 				Platform.runLater(()->{
+				solveH2B.setText("Solved with H2");
 				solution = data;
 				showSolutionB.setDisable(false);
 				});
@@ -365,18 +376,10 @@ public class JavaFXTemplate extends Application {
 	
 	EventHandler<ActionEvent> solve = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
-			solveH1B.setDisable(false);
-			solveH2B.setDisable(false);
 			newPuzzleB.setDisable(true);
-			
-			
 			showSolutionB.setDisable(true);
 			
-			solveH1B.setText("Solve with H1");
-			solveH2B.setText("Solve with H2");
-			
 			displaySolution();
-			
 		}
 	};
 	
@@ -385,7 +388,6 @@ public class JavaFXTemplate extends Application {
 			ourstage.close();
 		}
 	};
-	
 	
 	public boolean checkWin() {
 		
