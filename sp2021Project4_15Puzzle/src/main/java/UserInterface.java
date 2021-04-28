@@ -41,7 +41,7 @@ int[] puzzle;
 	 * @param puzzle
 	 * @return int array
 	 */
-	int[] stringToIntArray(String puzzle)
+	public static int[] stringToIntArray(String puzzle)
 	{
 		String[] values = puzzle.split("[ ]+");			//split string into array of strings(numbers)
 		

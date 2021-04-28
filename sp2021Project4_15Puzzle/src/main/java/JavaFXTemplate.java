@@ -82,13 +82,7 @@ public class JavaFXTemplate extends Application {
 		
 		// making a thread pool of 11 one for each possible puzzle.
 		threads = Executors.newFixedThreadPool(11);
-		// randomly picking a number to pick the puzzle to display first on GUI
-		Random rand = new Random();
-		puzzleCounter = rand.nextInt(11) + 1;
-
-		//----------------ADD COMMENTS--------------------(remove later)
-		solution = new ArrayList<Node>();
-
+		// ensures threads are shutdown before closing the window
 		ourstage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
@@ -98,16 +92,24 @@ public class JavaFXTemplate extends Application {
             }
         });
 		
+		// randomly picking a number to pick the puzzle to display first on GUI
+		Random rand = new Random();
+		puzzleCounter = rand.nextInt(11) + 1;
+
+		// initializes empty solution array for later holding the solution path
+		solution = new ArrayList<Node>();
+		
+		// change scene to the welcome scene
 		ourstage.setScene(welcomeScene());
 		ourstage.show();
 		
+		// 3 second pause to automatically transition to the game scene from welcome
 		pause = new PauseTransition(Duration.seconds(3));
 		pause.setOnFinished(e-> {
 			ourstage.setScene(gameScene());
 			ourstage.show();
 		});
 		pause.play();
-		//----------------ADD COMMENTS--------------------(remove later)
 	}
 	
 	/*returns the welcome screen with predetermined settings*/
@@ -319,6 +321,7 @@ public class JavaFXTemplate extends Application {
 					+ "A solved puzzle should have all of the tiles in order from lowest number to highest number with the blank spot in the upper left.\r\n\n"
 					+ "You can click either of the Solve Buttons to solve 10 moves in the background.\r\n"
 					+ "After it is solved, you can see those 10 moves by clicking the Show Solution Button.\r\n\n"
+					+ "You are not allowed make a move while the solution is being created or while the solution is being shown. \r\n\n"
 					+ "H1 uses the number of tiles that are out of place to solve the board.\r\n"
 					+ "H2 uses the manhattan distance to solve the board.\r\n\n"
 					+ "If you have trouble you can get a new puzzle by clicking New Puzzle or exit by clicking Exit.\r\n");
@@ -343,22 +346,24 @@ public class JavaFXTemplate extends Application {
 	/*Event handler for Heuristic one*/
 	EventHandler<ActionEvent> H1 = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
+			// Disable buttons to avoid messing with the puzzle as it is being solved
 			newPuzzleB.setDisable(true);
 			setDisableGridPane(true);
+			solveH1B.setDisable(true);
+			solveH2B.setDisable(true);
 			
+			// a new task is created to solve the board and update the game with runLater()
 			SolutionTask task = new SolutionTask(data->{
 				Platform.runLater(()->{
-				solveH1B.setText("Solved with H1");
-				solution = data;
-				showSolutionB.setDisable(false);
-				newPuzzleB.setDisable(false);
+					solveH1B.setText("Solved with H1");
+					solution = data;
+					showSolutionB.setDisable(false);
+					newPuzzleB.setDisable(false);
 				});
 			}, "heuristicOne", ArrayListToArray(puzzleList));
 			threads.submit(task);
 			
-			solveH1B.setDisable(true);
-			solveH2B.setDisable(true);
-			
+			// Let user know which heuristic is being solved
 			solveH1B.setText("Solving with H1");
 			solveH2B.setText("̵S̵o̵l̵v̵e̵ ̵w̵i̵t̵h̵ ̵H̵2");
 		}
@@ -367,9 +372,13 @@ public class JavaFXTemplate extends Application {
 	//--------------ADD COMMENTS ----------------------- (delete later)
 	EventHandler<ActionEvent> H2 = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
+			// Disable buttons to avoid messing with the puzzle as it is being solved
 			newPuzzleB.setDisable(true);
 			setDisableGridPane(true);
+			solveH1B.setDisable(true);
+			solveH2B.setDisable(true);
 			
+			// a new task is created to solve the board and update the game with runLater()
 			SolutionTask task = new SolutionTask(data->{
 				Platform.runLater(()->{
 				solveH2B.setText("Solved with H2");
@@ -379,9 +388,7 @@ public class JavaFXTemplate extends Application {
 			}, "heuristicTwo", ArrayListToArray(puzzleList));
 			threads.submit(task);
 			
-			solveH1B.setDisable(true);
-			solveH2B.setDisable(true);
-			
+			// Let user know which heuristic is being solved
 			solveH1B.setText("̵S̵o̵l̵v̵e̵ ̵w̵i̵t̵h̵ ̵H̵1");
 			solveH2B.setText("Solving with H2");
 		}
@@ -570,14 +577,19 @@ public class JavaFXTemplate extends Application {
 		/*Helper function for swapButton which switches the number on the array and then sets color*/
 		public void updateNum(Integer n) {
 			this.num = n;
+			// if this is the zero button
 			if (n == 0) {
+				//colors the zero button golden and makes it show blank
 				this.setText("");
-				this.setStyle("-fx-background-color: #fbfb6a;");		// golden
+				this.setStyle("-fx-background-color: #fbfb6a;");
 			} else {
 				this.setText(n.toString());
+				// checks if button position matches it's placement
 				if (puzzleList.indexOf(this) == n) {
+					// if button position matches it's number color it green
 					this.setStyle("-fx-background-color: #9cfc9c;");	// green
 				} else {
+					// if button position does not match its placement, color it blue
 					this.setStyle("-fx-background-color: #9cccfc;");	// blue
 				}
 			}
