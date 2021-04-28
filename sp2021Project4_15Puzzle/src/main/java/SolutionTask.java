@@ -1,3 +1,8 @@
+/*
+ * Authors: 
+ *      Angel Cardenas		651018873		acarde36
+ *      Kartik Maheshwari	665023848		kmahes5
+ */
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
