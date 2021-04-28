@@ -446,6 +446,9 @@ public class JavaFXTemplate extends Application {
 	/*Event handler for quit button which closes the stage*/
 	EventHandler<ActionEvent> quit = new EventHandler<ActionEvent>() {
 		public void handle(ActionEvent e) {
+			threads.shutdown();
+            Platform.exit();
+            System.exit(0);
 			ourstage.close();
 		}
 	};
